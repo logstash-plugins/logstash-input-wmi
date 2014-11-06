@@ -10,7 +10,7 @@ require "socket"
 # which is accessible via WMI on a Windows host
 #
 # Example:
-#
+# [source,ruby]
 #     input {
 #       wmi {
 #         query => "select * from Win32_Process"
