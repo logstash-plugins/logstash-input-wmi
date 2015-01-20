@@ -23,7 +23,6 @@ require "socket"
 class LogStash::Inputs::WMI < LogStash::Inputs::Base
 
   config_name "wmi"
-  milestone 1
 
   # WMI query
   config :query, :validate => :string, :required => true
