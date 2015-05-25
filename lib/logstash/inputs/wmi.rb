@@ -49,7 +49,7 @@ class LogStash::Inputs::WMI < LogStash::Inputs::Base
 
   public
   def run(queue)
-    if (@host == "127.0.0.1" || @host == "localhost")
+    if (@host == "127.0.0.1" || @host == "localhost" || @host == "::1")
       @wmi = WIN32OLE.connect('winmgmts:')
       @host = Socket.gethostname
     else
