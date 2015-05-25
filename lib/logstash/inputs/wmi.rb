@@ -28,6 +28,11 @@ class LogStash::Inputs::WMI < LogStash::Inputs::Base
   config :query, :validate => :string, :required => true
   # Polling interval
   config :interval, :validate => :number, :default => 10
+  # Remote parameters (defaults to localhost without auth)
+  config :host, :validate => :string, :default => 'localhost'
+  config :user, :validate => :string
+  config :password, :validate => :string
+  config :namespace, :validate => :string, :default => 'root\cimv2'
   
   public
   def register
@@ -44,7 +49,14 @@ class LogStash::Inputs::WMI < LogStash::Inputs::Base
 
   public
   def run(queue)
-    @wmi = WIN32OLE.connect("winmgmts://")
+    if (@host == "127.0.0.1" || @host == "localhost")
+      @wmi = WIN32OLE.connect('winmgmts:')
+      @host = Socket.gethostname
+    else
+      locator = WIN32OLE.new("WbemScripting.SWbemLocator")
+      @host = Socket.gethostbyname(@host)[0]
+      @wmi = locator.ConnectServer(@host, @namespace, @user, @password)
+    end
     
     begin
       @logger.debug("Executing WMI query '#{@query}'")
