@@ -55,7 +55,11 @@ class LogStash::Inputs::WMI < LogStash::Inputs::Base
           event["host"] = @host
           decorate(event)
           wmiobj.Properties_.each do |prop|
-            event[prop.name] = prop.value
+            if prop.value.is_a?(String)
+              event[prop.name] = prop.value.force_encoding(Encoding::UTF_8)
+            else
+              event[prop.name] = prop.value
+	    end
           end
           queue << event
 	  break if stop?
