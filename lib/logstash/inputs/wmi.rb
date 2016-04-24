@@ -2,7 +2,7 @@
 require "logstash/inputs/base"
 require "logstash/namespace"
 require "socket"
-
+require "stud/interval"
 
 # Collect data from WMI query
 #
@@ -70,23 +70,28 @@ class LogStash::Inputs::WMI < LogStash::Inputs::Base
   def run(queue)
 
     begin
-      @logger.debug("Executing WMI query '#{@query}'")
-      loop do
+      while !stop?
+        @logger.debug("Executing WMI query '#{@query}'")
         @wmi.ExecQuery(@query).each do |wmiobj|
           # create a single event for all properties in the collection
           event = LogStash::Event.new
           event["host"] = @host
           decorate(event)
           wmiobj.Properties_.each do |prop|
-            event[prop.name] = prop.value
+            if prop.value.is_a?(String)
+              event[prop.name] = prop.value.force_encoding(Encoding::UTF_8)
+            else
+              event[prop.name] = prop.value
+	    end
           end
           queue << event
+	  break if stop?
         end
-        sleep @interval
+        Stud.stoppable_sleep(@interval) { stop? }
       end # loop
     rescue Exception => ex
       @logger.error("WMI query error: #{ex}\n#{ex.backtrace}")
-      sleep @interval
+      Stud.stoppable_sleep(@interval) { stop? }
       retry
     end # begin/rescue
   end # def run
