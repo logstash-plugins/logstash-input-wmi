@@ -75,10 +75,10 @@ class LogStash::Inputs::WMI < LogStash::Inputs::Base
         @wmi.ExecQuery(@query).each do |wmiobj|
           # create a single event for all properties in the collection
           event = LogStash::Event.new
-          event["host"] = @host
+          event.set("host", @host)
           decorate(event)
           wmiobj.Properties_.each do |prop|
-            event[prop.name] = prop.value
+            event.set(prop.name, prop.value)
           end
           queue << event
         end
