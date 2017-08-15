@@ -1,3 +1,6 @@
+## 3.0.2
+  - Fix some documentation issues
+
 ## 3.0.0
   - Relax constraints on the `logstash-core-plugin-api`
   - Update plugin to the new event api
